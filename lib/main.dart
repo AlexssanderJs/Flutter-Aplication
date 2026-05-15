@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/models/tourist_place_model.dart';
+import 'models/tourist_place_model.dart';
+import 'models/task_list_model.dart';
 import 'mocks/tourist_place_mock.dart';
+import 'mocks/task_list_mock.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,11 +48,12 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  final List<TouristPlaceModel> _touristPlaces = touristPlaceMock;
-  late final List<bool> _tasksCompleted = List.generate(
-    _touristPlaces.length,
-    (index) => false,
+  final List<TaskListModel> _tasks = taskListMock;
+  late final List<bool> _tasksStatus = List.generate(
+    _tasks.length,
+    (index) => _tasks[index].isCompleted,
   );
+
   final bool _cursorHover = false;
 
   @override
@@ -161,10 +164,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
 
                           onPressed: () {
-                            _printSnackbarMessage('Visitados Pressed');
+                            _printSnackbarMessage('Concluidos Pressed');
                           },
                           icon: Text(
-                            'Visitados',
+                            'Concluidos',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -192,10 +195,42 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
 
                           onPressed: () {
-                            _printSnackbarMessage('Favoritos Pressed');
+                            _printSnackbarMessage('Em Andamento Pressed');
                           },
                           icon: Text(
-                            'Favoritos',
+                            'Em Andamento',
+                            style: TextStyle(
+                              color: _cursorHover
+                                  ? Color.fromARGB(255, 69, 14, 133)
+                                  : Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: IconButton(
+                          constraints: BoxConstraints(
+                            minHeight: double.infinity,
+                            minWidth: double.infinity,
+                          ),
+                          style: IconButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(10),
+                                bottomRight: Radius.circular(10),
+                              ),
+                            ),
+                            overlayColor: Colors.white,
+                          ),
+
+                          onPressed: () {
+                            _printSnackbarMessage('Todos Pressed');
+                          },
+                          icon: Text(
+                            'Todos',
                             style: TextStyle(
                               color: _cursorHover
                                   ? Color.fromARGB(255, 69, 14, 133)
@@ -212,12 +247,36 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            alignment: Alignment.centerLeft,
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 69, 14, 133),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Color.fromARGB(104, 10, 7, 12),
+                  blurRadius: 15,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Text(
+              'Tarefas Concluídas: ${_tasksStatus.where((status) => status).length} de ${_tasksStatus.length}',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+                fontSize: 15,
+              ),
+            ),
+          ),
           Expanded(
             child: SizedBox(
               child: ListView.builder(
-                itemCount: _touristPlaces.length,
+                itemCount: _tasks.length,
                 itemBuilder: (context, index) {
-                  final iscompleted = _tasksCompleted[index];
+                  final iscompleted = _tasksStatus[index];
                   return Card(
                     clipBehavior: Clip.antiAlias,
                     color: iscompleted
@@ -227,7 +286,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     elevation: 3,
                     child: InkWell(
                       onTap: () {
-                        _printSnackbarMessage('Place Pressed');
+                        _printSnackbarMessage('Task Pressed');
                       },
                       child: Padding(
                         padding: EdgeInsets.all(5.0),
@@ -237,132 +296,68 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Column(
                                 children: [
                                   ListTile(
-                                    leading: Icon(Icons.location_on),
-                                    title: Wrap(
-                                      children: [
-                                        Text(
-                                          _touristPlaces[index].name,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(width: 35),
-                                        Text(_touristPlaces[index].city),
-                                      ],
+                                    leading: Icon(
+                                      Icons.check_circle,
+                                      color: iscompleted
+                                          ? Colors.green
+                                          : Colors.grey,
+                                    ),
+                                    title: Text(
+                                      _tasks[index].title,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
 
                                     subtitle: Padding(
                                       padding: EdgeInsets.only(top: 4.0),
-                                      child: Text(
-                                        _touristPlaces[index].description,
-                                        style: TextStyle(fontSize: 16),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            _tasks[index].description,
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                alignment: Alignment.center,
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Color.fromARGB(
+                                                      255,
+                                                      69,
+                                                      14,
+                                                      133,
+                                                    ),
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                                child: Text(
+                                                  iscompleted
+                                                      ? 'Concluída'
+                                                      : 'Pendente',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     trailing: IconButton(
                                       icon: Icon(Icons.check),
                                       onPressed: () {
                                         setState(() {
-                                          _tasksCompleted[index] =
-                                              !_tasksCompleted[index];
+                                          _tasksStatus[index] =
+                                              !_tasksStatus[index];
                                         });
                                       },
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Color.fromARGB(
-                                                255,
-                                                69,
-                                                14,
-                                                133,
-                                              ),
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text(
-                                              _touristPlaces[index].category,
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Color.fromARGB(
-                                                255,
-                                                69,
-                                                14,
-                                                133,
-                                              ),
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text(
-                                              '${_touristPlaces[index].distance.toStringAsFixed(1)} km',
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Color.fromARGB(
-                                                255,
-                                                69,
-                                                14,
-                                                133,
-                                              ),
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text(
-                                              _touristPlaces[index].isFree
-                                                  ? 'Grátis'
-                                                  : 'Pago',
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Color.fromARGB(
-                                                255,
-                                                69,
-                                                14,
-                                                133,
-                                              ),
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text(
-                                              _touristPlaces[index].rating
-                                                  .toStringAsFixed(1),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
                                     ),
                                   ),
                                 ],
